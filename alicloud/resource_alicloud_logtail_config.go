@@ -164,14 +164,17 @@ func resourceAlicloudLogtailConfiglUpdate(d *schema.ResourceData, meta interface
 	if d.HasChange("input_type") {
 		update = true
 	}
+	fmt.Println("update:", update)
 	if update {
 		logconfig := &sls.LogConfig{}
 		inputConfigInputDetail := make(map[string]interface{})
 		data := d.Get("input_detail").(string)
+		fmt.Println("get input_detail:", data)
 		conver_err := json.Unmarshal([]byte(data), &inputConfigInputDetail)
 		if conver_err != nil {
 			return WrapError(conver_err)
 		}
+		fmt.Println("unmarshal to:", inputConfigInputDetail)
 		sls.AddNecessaryInputConfigField(inputConfigInputDetail)
 		covertInput, covertErr := assertInputDetailType(inputConfigInputDetail, logconfig)
 		if covertErr != nil {
@@ -192,6 +195,7 @@ func resourceAlicloudLogtailConfiglUpdate(d *schema.ResourceData, meta interface
 				LogStoreName: d.Get("logstore").(string),
 			},
 		}
+		fmt.Println(logconfig.InputDetail)
 		raw, err := client.WithLogClient(func(slsClient *sls.Client) (interface{}, error) {
 			requestInfo = slsClient
 			return nil, slsClient.UpdateConfig(parts[0], params)
