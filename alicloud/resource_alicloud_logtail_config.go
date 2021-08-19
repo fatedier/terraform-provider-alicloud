@@ -167,7 +167,9 @@ func resourceAlicloudLogtailConfiglUpdate(d *schema.ResourceData, meta interface
 	}
 	log.Println("[DEBUG] update:", update)
 	if update {
-		logconfig := &sls.LogConfig{}
+		logconfig := &sls.LogConfig{
+			InputType: d.Get("input_type").(string),
+		}
 		inputConfigInputDetail := make(map[string]interface{})
 		data := d.Get("input_detail").(string)
 		log.Println("[DEBUG] get input_detail:", data)
@@ -181,6 +183,7 @@ func resourceAlicloudLogtailConfiglUpdate(d *schema.ResourceData, meta interface
 		if covertErr != nil {
 			return WrapError(covertErr)
 		}
+		log.Println("[DEBUG] ", covertInput)
 		logconfig.InputDetail = covertInput
 
 		client := meta.(*connectivity.AliyunClient)
@@ -283,6 +286,7 @@ func assertInputDetailType(inputConfigInputDetail map[string]interface{}, logcon
 		logconfig.InputDetail = DelimiterConfigInputDetail
 	}
 	if logconfig.InputType == "plugin" {
+		log.Println("[DEBUG] inputType = plugin")
 		PluginLogConfigInputDetail, ok := sls.ConvertToPluginLogConfigInputDetail(inputConfigInputDetail)
 		if ok != true {
 			return nil, WrapError(Error("covert to JSONConfigInputDetail false "))
